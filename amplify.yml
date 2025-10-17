@@ -1,40 +1,29 @@
 version: 1
-applications:
-  - appRoot: ./frontend  # Specify the path to your frontend app directory
-    frontend:
-      phases:
-        preBuild:
-          commands:
-            - echo "Running frontend prebuild"
-        build:
-          commands:
-            - make frontend-build  # Assuming you are using Makefile for build commands
-      artifacts:
-        baseDirectory: /frontend/dist  # Update with correct build output path
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - node_modules/**/*  # Cache node_modules to speed up subsequent builds
-  - appRoot: ./backend  # Specify the path to your backend app directory
-    backend:
-      phases:
-        preBuild:
-          commands:
-            - curl "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -L -o "aws-sam-cli.zip"
-            - unzip aws-sam-cli.zip -d sam-installation
-            - ./sam-installation/install
-            - pip3 install -U boto3
-        build:
-          commands:
-            - make backend  # Assuming backend is built with make command
-      artifacts:  # No artifacts needed for backend, if using SAM for deployment
-        baseDirectory: /
-        files: []
-      cache:
-        paths: []
-
 env:
   variables:
-    ORIGIN: https://${AWS_BRANCH//\//-}.${AWS_APP_ID}.amplifyapp.com
-    STACKNAME: amplify-aws-serverless-shopping-cart
+      ORIGIN: https://${AWS_BRANCH//\//-}.${AWS_APP_ID}.amplifyapp.com
+      STACKNAME: amplify-aws-serverless-shopping-cart
+backend:
+  phases:
+    preBuild:
+      commands:
+        - curl "https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip" -L -o "aws-sam-cli.zip"
+        - unzip aws-sam-cli.zip -d sam-installation
+        - ./sam-installation/install
+        - pip3 install -U boto3
+    build:
+      commands:
+        - make backend
+frontend:
+  phases:
+    # IMPORTANT - Please verify your build commands
+    build:
+      commands:
+        - make frontend-build
+  artifacts:
+    # IMPORTANT - Please verify your build output directory
+    baseDirectory: /frontend/dist
+    files:
+      - '**/*'
+  cache:
+    paths: []
